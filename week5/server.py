@@ -4,7 +4,7 @@ import time
 import os
 import struct
 
-print("\nSelamat datang di FTP SERVER.\n\nMenunggu koneksi dari client...\n\n")
+print("\nWelcome to the FTP server.\n\nWaiting for client connection...\n\n")
 
 TCP_IP = "127.0.0.1"
 TCP_PORT = 1456
@@ -14,35 +14,17 @@ s.bind((TCP_IP, TCP_PORT))
 s.listen(1)
 conn, addr = s.accept()
 
-print("\n Koneksi dengan alamat : {}".format(addr))
+# Koneksi terhubung dengan client
+print("\nConnection by address : {}".format(addr))
 
-# buat fungsi upload {nama file} : ketika client menginputkan command tersebut, maka server akan menerima dan menyimpan file dengan acuan nama file yang diberikan pada parameter pertama
-# def upld():
-#     conn.send(b"1")
-#     file_name_length = struct.unpack("h", conn.recv(2))[0]
-#     file_name = conn.recv(file_name_length).decode()
-#     conn.send(b"1")
-#     file_size = struct.unpack("i", conn.recv(4))[0]
-#     start_time = time.time()
-#     print("Receiving file...")
-#     content = open(file_name, "wb")
-#     l = conn.recv(BUFFER_SIZE)
-#     while l:
-#         content.write(l)
-#         l = conn.recv(BUFFER_SIZE)
-#     content.close()
-#     conn.send(struct.pack("f", time.time() - start_time))
-#     conn.send(struct.pack("i", file_size))
-#     print("File received successfully")
-#     return
-
+# Function untuk upload file
 def upld():
     try:
         conn.send(b"upload")
-        conn.recv(BUFFER_SIZE)  # Menunggu konfirmasi dari klien
+        conn.recv(BUFFER_SIZE) 
         file_name_length = struct.unpack("h", conn.recv(2))[0]
         file_name = conn.recv(file_name_length).decode()
-        conn.send(b"1")  # Konfirmasi untuk menerima nama file
+        conn.send(b"1")  
         file_size = struct.unpack("i", conn.recv(4))[0]
         start_time = time.time()
         print("Receiving file...")
@@ -53,16 +35,15 @@ def upld():
             content.write(l)
             received_bytes += len(l)
         content.close()
-        conn.send(b"1")  # Konfirmasi untuk selesai menerima file
-        conn.send(struct.pack("f", time.time() - start_time))  # Mengirim waktu yang diperlukan
-        conn.send(struct.pack("i", file_size))  # Mengirim ukuran file
+        conn.send(b"1") 
+        conn.send(struct.pack("f", time.time() - start_time)) 
+        conn.send(struct.pack("i", file_size)) 
         print("File received successfully")
     except Exception as e:
         print("Error receiving file:", e)
         return
 
-
-
+# Function untuk melihat list file
 def list_files():
     print("Listing files...")
     listing = os.listdir(os.getcwd())
@@ -79,7 +60,7 @@ def list_files():
     print("Successfully sent file listing")
     return
 
-# buat fungsi download {nama file} : ketika client menginputkan command tersebut, maka server akan memberikan file dengan acuan nama file yang diberikan pada parameter pertama
+# Function untuk download file
 def dwld():
     conn.send(b"1")
     file_name_length = struct.unpack("h", conn.recv(2))[0]
@@ -104,6 +85,7 @@ def dwld():
     print("File sent successfully")
     return
 
+# Function untuk menghapus file
 def delf():
     conn.send(b"1")
     file_name_length = struct.unpack("h", conn.recv(2))[0]
@@ -124,7 +106,7 @@ def delf():
         print("Delete abandoned by client!")
         return
 
-# buat fungsi size {nama file} : ketika client menginputkan command tersebut, maka server akan memberikan informasi file dalam satuan MB (Mega bytes) dengan acuan nama file yang diberikan pada parameter pertama
+# Function untuk melihat size file
 def get_file_size():
     conn.send(b"1")
     file_name_length = struct.unpack("h", conn.recv(2))[0]
@@ -135,7 +117,7 @@ def get_file_size():
         conn.send(struct.pack("i", -1))
     return
 
-
+# Function untuk keluar dari program
 def quit():
     conn.send(b"1")
     conn.close()

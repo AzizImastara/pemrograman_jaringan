@@ -9,46 +9,21 @@ TCP_PORT = 1456
 BUFFER_SIZE = 1024
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
+
+# Function untuk menghubungkan socket client
 def connme():
     try:
         s.connect((TCP_IP, TCP_PORT))
-        print("Koneksi berhasil!")
+        print("Connection connected!")
     except:
-        print("Koneksi gagal! Pastikan server telah dijalankan dan port yang digunakan benar")
+        print("Connection failed! Make sure the server is running and the correct port is used")
 
-# buat fungsi upload {nama file} : ketika client menginputkan command tersebut, maka server akan menerima dan menyimpan file dengan acuan nama file yang diberikan pada parameter pertama
-# def upld(file_name):
-#     try:
-#         s.send(b"upload")
-#     except:
-#         print("Couldn't make server request. Make sure a connection has been established.")
-#         return
-#     try:
-#         s.recv(BUFFER_SIZE)
-#         s.send(struct.pack("h", sys.getsizeof(file_name)))
-#         s.send(file_name.encode())
-#         file_size = os.path.getsize(file_name)
-#         s.send(struct.pack("i", file_size))
-#         start_time = time.time()
-#         print("Sending file...")
-#         content = open(file_name, "rb")
-#         l = content.read(BUFFER_SIZE)
-#         while l:
-#             s.send(l)
-#             l = content.read(BUFFER_SIZE)
-#         content.close()
-#         s.recv(BUFFER_SIZE)
-#         s.send(struct.pack("f", time.time() - start_time))
-#         print("File sent successfully")
-#         return
-#     except:
-#         print("Error sending file")
-#         return
-        
+
+# Function untuk upload file
 def upld(file_name):
     try:
         s.send(b"upload")
-        s.recv(BUFFER_SIZE)  # Menunggu konfirmasi dari server
+        s.recv(BUFFER_SIZE)  
         s.send(struct.pack("h", sys.getsizeof(file_name)))
         s.send(file_name.encode())
         file_size = os.path.getsize(file_name)
@@ -61,14 +36,14 @@ def upld(file_name):
             s.send(l)
             l = content.read(BUFFER_SIZE)
         content.close()
-        s.recv(BUFFER_SIZE)  # Menunggu konfirmasi selesai dari server
+        s.recv(BUFFER_SIZE)  
         s.send(struct.pack("f", time.time() - start_time))
         print("File sent successfully")
     except Exception as e:
         print("Error sending file:", e)
         return
 
-
+# Function untuk melihat list file
 def list_files():
     try:
         s.send(b"ls")
@@ -95,7 +70,7 @@ def list_files():
         print("Couldn't get final server confirmation")
         return
 
-# buat fungsi download {nama file} : ketika client menginputkan command tersebut, maka server akan memberikan file dengan acuan nama file yang diberikan pada parameter pertama
+# Function untuk download file
 def dwld(file_name):
     try:
         s.send(b"download")
@@ -131,6 +106,7 @@ def dwld(file_name):
         return
     return
 
+# Function untuk delete file
 def delf(file_name):
     try:
         s.send(b"rm")
@@ -178,7 +154,7 @@ def delf(file_name):
         print("Couldn't delete file")
         return
 
-# buat fungsi size {nama file} : ketika client menginputkan command tersebut, maka server akan memberikan informasi file dalam satuan MB (Mega bytes) dengan acuan nama file yang diberikan pada parameter pertama
+# Function untuk cek size file
 def get_file_size(file_name):
     try:
         s.send(b"size")
@@ -203,6 +179,7 @@ def get_file_size(file_name):
         print("Couldn't get final server confirmation")
         return
 
+# Function untuk keluar program
 def quit():
     s.send(b"byebye")
     s.recv(BUFFER_SIZE)
@@ -210,15 +187,14 @@ def quit():
     print("Server connection ended")
     return
 
-print("Selamat datang dalam program FTP ( BASIC )\n")
-print("INSTRUKSI :")
-print("connme              : Connect to server ( jalankan ini dulu untuk lanjut perintah lain )")
-print("upload <file_path>  : Upload file")
-print("ls                  : List files")
-print("download <file_path>: Download file")
-print("rm <file_path>      : Delete file")
-print("size <file_path>    : Get file size")
-print("byebye              : Keluar program")
+print("Welcome to the FTP program \n")
+print("connme               : Connect to server")
+print("upload <file_name>   : Upload file")
+print("ls                   : List file")
+print("download <file_name> : Download file")
+print("rm <file_name>       : Delete file")
+print("size <file_name>     : Get size file")
+print("byebye               : Out program")
 
 
 while True:
@@ -239,4 +215,4 @@ while True:
         quit()
         break
     else:
-        print("Command not recognized; please try again")
+        print("Command not found \n Please try again!")
