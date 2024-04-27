@@ -1,48 +1,38 @@
 import socket
 import random
-import threading
-import time
 
-# List of colors in English and Indonesian
-colors_en = ['red', 'green', 'blue', 'yellow', 'purple', 'orange']
-colors_id = ['merah', 'hijau', 'biru', 'kuning', 'ungu', 'oranye']
-
-# Function to send a random color to all clients
 def send_random_color():
-    while True:
-        color = random.choice(colors_en)
-        print(f"Sending color: {color}")
-        for client in clients:
-            server_socket.sendto(color.encode(), client)
-        time.sleep(10)  # Wait for 10 seconds before sending next color
+    colors = ["white", "green", "yellow", "purple", "blue", "black", "red"]
+    return random.choice(colors)
 
-# Function to receive responses from clients
-def receive_responses():
-    while True:
-        message, client_address = server_socket.recvfrom(2048)
-        response = message.decode().strip().lower()
-        if response in colors_id:
-            print(f"Client {client_address} responded correctly with {response}")
-            server_socket.sendto(b'100', client_address)  # Send 100 points to client
-        else:
-            print(f"Client {client_address} responded incorrectly.")
-            server_socket.sendto(b'0', client_address)
+server_ip = "127.0.0.1"
+server_port = 2222
 
-# Create a UDP socket
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-server_socket.bind(('localhost', 12345))
+server_socket.bind((server_ip, server_port))
 
-clients = set()
+print(f"Server berjalan di {server_ip}:{server_port}")
+
+connected_clients = {}  
 
 try:
-    # Start the thread for sending random colors
-    color_thread = threading.Thread(target=send_random_color)
-    color_thread.daemon = True
-    color_thread.start()
+    while True:
+        data, client_address = server_socket.recvfrom(2048)
+        data = data.decode("utf-8")
 
-    # Start receiving responses from clients
-    receive_responses()
+        if client_address not in connected_clients:
+            connected_clients[client_address] = data
+            print(f"Client {data} terhubung dari {client_address}")
+
+        else:
+            print(f"Respons dari {connected_clients[client_address]} ({client_address}): {data}")
+
+        if data == "request_color":
+            color = send_random_color()
+            server_socket.sendto(color.encode("utf-8"), client_address)
+            print(f"Kirim warna {color} ke {connected_clients[client_address]} ({client_address})")
 
 except KeyboardInterrupt:
-    print("Server is shutting down")
-    server_socket.close()
+    print("\nServer stop")
+
+server_socket.close()

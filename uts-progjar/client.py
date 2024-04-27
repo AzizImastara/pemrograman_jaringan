@@ -1,50 +1,65 @@
 import socket
+import time
+import threading
 
-def main():
-    server_ip = "127.0.0.1"
-    server_port = 12345
-
-    client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-
-    try:
-        while True:
-            # Request a color from the server
-            client_socket.sendto(b"Request color", (server_ip, server_port))
-            random_color, _ = client_socket.recvfrom(1024)
-            random_color = random_color.decode()
-
-            print(f"Received color: {random_color}")
-
-            # Get user input for the translated color
-            user_response = input("Enter the color in Bahasa Indonesia: ")
-
-            # Validate user input
-            if user_response.lower() not in ['merah', 'hijau', 'biru', 'kuning', 'ungu', 'oranye']:
-                print("Invalid input! Please enter a valid color in Bahasa Indonesia.")
-                continue
-
-            # Check if the user response matches the color received from the server
-            if user_response.lower() == translate_to_indonesian(random_color.lower()):
-                print("Correct! You scored 100 points.")
-            else:
-                print("Incorrect. Try again!")
-
-    except KeyboardInterrupt:
-        print("\nClient stopped.")
-    finally:
-        client_socket.close()
-
-def translate_to_indonesian(color):
-    # Dictionary mapping English colors to Indonesian
-    color_translations = {
-        'red': 'merah',
-        'green': 'hijau',
-        'blue': 'biru',
-        'yellow': 'kuning',
-        'purple': 'ungu',
-        'orange': 'oranye'
+def translate_color(english_color):
+    color_mapping = {
+        "white": "putih",
+        "green": "hijau",
+        "yellow": "kuning",
+        "purple": "ungu",
+        "blue": "biru",
+        "black": "hitam",
+        "red": "merah",
     }
-    return color_translations.get(color, "unknown")
+    return color_mapping.get(english_color.lower(), "tidak dikenali")
 
-if __name__ == "__main__":
-    main()
+server_ip = "127.0.0.1"
+server_port = 2222
+
+client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+def timeout(prompt, timeout_duration):
+    print(prompt, flush=True)
+    response = [None]
+    def input_thread():
+        try:
+            response[0] = input()
+        except:
+            pass
+    thread = threading.Thread(target=input_thread)
+    thread.start()
+    thread.join(timeout_duration)
+    if thread.is_alive():
+        print(f"\nAnda tidak merespon selama {timeout_duration} detik\n")
+        print("Enter untuk melanjutkan lagi\n")
+        thread.join()
+        return None
+    else:
+        return response[0]
+
+try:
+    client_name = input("Masukkan nama Anda: ")
+    while True:
+        client_socket.sendto(client_name.encode("utf-8"), (server_ip, server_port))
+        client_socket.sendto("request_color".encode("utf-8"), (server_ip, server_port))
+        color, server_address = client_socket.recvfrom(2048)
+        color = color.decode("utf-8")
+        print(f"{color}")
+
+        response = timeout("Sebutkan warna dalam bahasa Indonesia? ", 5)
+
+        indonesian_color = translate_color(color)
+        if response is None:
+            print("Timeout \nNilai feedback: 0")
+        elif response.lower() == indonesian_color:
+            print("Response benar! \nNilai feedback: 100")
+        else:
+            print("Response salah! \nNilai feedback: 0")
+
+        print("Silahkan tunggu 10 detik untuk menerima warna baru\n")
+        time.sleep(10)
+except KeyboardInterrupt:
+    print("\nClient stop")
+
+client_socket.close()
