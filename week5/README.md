@@ -133,6 +133,8 @@ Sending file...
 File sent successfully
 ```
 
+<img src="https://github.com/AzizImastara/pemrograman_jaringan/blob/main/week5/upload.png" />
+
 Digunakan untuk upload file
 
 2. ls
