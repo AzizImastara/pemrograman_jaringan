@@ -23,7 +23,7 @@ def upld():
         conn.send(b"upload")
         conn.recv(BUFFER_SIZE) 
         file_name_length = struct.unpack("h", conn.recv(2))[0]
-        file_name = conn.recv(file_name_length).decode()
+        file_name = os.path.join("folder_upload", conn.recv(file_name_length).decode())  
         conn.send(b"1")  
         file_size = struct.unpack("i", conn.recv(4))[0]
         start_time = time.time()
@@ -42,6 +42,8 @@ def upld():
     except Exception as e:
         print("Error receiving file:", e)
         return
+
+
 
 # Function untuk melihat list file
 def list_files():

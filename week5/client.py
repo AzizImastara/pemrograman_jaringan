@@ -18,30 +18,41 @@ def connme():
     except:
         print("Connection failed! Make sure the server is running and the correct port is used")
 
-
 # Function untuk upload file
 def upld(file_name):
     try:
+        file_path = os.path.join("folder_upload", file_name)
+        
+        if not os.path.exists(file_path):
+            print("File not found")
+            return
+
         s.send(b"upload")
         s.recv(BUFFER_SIZE)  
-        s.send(struct.pack("h", sys.getsizeof(file_name)))
+
+        file_name = os.path.basename(file_path)
+        s.send(struct.pack("h", len(file_name)))
         s.send(file_name.encode())
-        file_size = os.path.getsize(file_name)
+
+        file_size = os.path.getsize(file_path)
         s.send(struct.pack("i", file_size))
+
         start_time = time.time()
         print("Sending file...")
-        content = open(file_name, "rb")
-        l = content.read(BUFFER_SIZE)
-        while l:
-            s.send(l)
+        with open(file_path, "rb") as content:
             l = content.read(BUFFER_SIZE)
-        content.close()
+            while l:
+                s.send(l)
+                l = content.read(BUFFER_SIZE)
+        
         s.recv(BUFFER_SIZE)  
         s.send(struct.pack("f", time.time() - start_time))
         print("File sent successfully")
     except Exception as e:
         print("Error sending file:", e)
         return
+
+
 
 # Function untuk melihat list file
 def list_files():
