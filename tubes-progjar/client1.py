@@ -49,9 +49,9 @@ def send_messages(client_socket):
         elif choice == "4":
             recipient = input("Enter the username to send a file to: ")
             filename = input("Enter the filename: ")
-            
-            # Construct the correct file path relative to the TUBES directory
-            file_path = os.path.join('TUBES', filename)
+
+            # Ensure the file exists in the correct directory
+            file_path = os.path.join(os.getcwd(), filename)
             
             if os.path.isfile(file_path):
                 client_socket.send(f"file:{recipient}:{file_path}".encode())
