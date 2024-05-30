@@ -4,25 +4,52 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Status Perguruan Tinggi Swasta</title>
+    <!-- Tambahkan Bootstrap CSS -->
+    <link
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        padding: 20px;
+      }
+      table {
+        width: 100%;
+        margin-top: 20px;
+      }
+      th,
+      td {
+        text-align: center;
+        padding: 10px;
+      }
+      th {
+        background-color: #f8f9fa;
+      }
+      .countdown {
+        font-weight: bold;
+      }
+    </style>
   </head>
   <body>
-    <h1>Status Website Perguruan Tinggi Swasta</h1>
-    <div id="countdown"></div>
-    <!-- Menampilkan countdown timer -->
-    <table id="status-table">
-      <thead>
-        <tr>
-          <th>URL</th>
-          <th>Status</th>
-          <th>HTTP Status</th>
-          <!-- Menambahkan kolom HTTP Status -->
-        </tr>
-      </thead>
-      <tbody>
-        <!-- Rows akan diisi oleh JavaScript -->
-      </tbody>
-    </table>
+    <div class="container">
+      <h1 class="text-center">Status Website Perguruan Tinggi Swasta</h1>
+      <table id="status-table" class="table table-bordered">
+        <thead class="thead-light">
+          <tr>
+            <th>URL</th>
+            <th>Status</th>
+            <th>Countdown</th>
+            <!-- Menambahkan kolom countdown -->
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Rows akan diisi oleh JavaScript -->
+        </tbody>
+      </table>
+    </div>
     <script>
+      const countdowns = {}; // Menyimpan timer untuk setiap URL
+
       function updateStatus() {
         fetch("/status")
           .then((response) => response.json())
@@ -31,38 +58,83 @@
               .getElementById("status-table")
               .getElementsByTagName("tbody")[0];
             tableBody.innerHTML = "";
-            for (const url_obj of data.urls) {
+            data.urls.forEach((url_obj) => {
               const row = tableBody.insertRow();
               const urlCell = row.insertCell(0);
               const statusCell = row.insertCell(1);
-              const httpStatusCell = row.insertCell(2); // Menambahkan sel untuk HTTP Status
+              const countdownCell = row.insertCell(2);
+
               urlCell.textContent = url_obj.url;
               statusCell.textContent = url_obj.status;
-              httpStatusCell.textContent =
-                url_obj.http_status !== null ? url_obj.http_status : "N/A"; // Menampilkan status HTTP atau N/A jika null
-            }
+              countdownCell.classList.add("countdown");
+
+              // Tentukan interval berdasarkan status
+              const interval = url_obj.status === "Up" ? 60 : 30;
+
+              // Mulai countdown baru
+              if (countdowns[url_obj.url]) {
+                clearInterval(countdowns[url_obj.url].interval);
+              }
+
+              let seconds = interval;
+              countdownCell.textContent = `${seconds} seconds`;
+
+              countdowns[url_obj.url] = {
+                interval: setInterval(() => {
+                  seconds--;
+                  countdownCell.textContent = `${seconds} seconds`;
+                  if (seconds <= 0) {
+                    clearInterval(countdowns[url_obj.url].interval);
+                    // Update status hanya untuk URL yang bersangkutan
+                    updateSingleStatus(url_obj.url);
+                  }
+                }, 1000),
+              };
+            });
           })
           .catch((error) => console.error("Error fetching status:", error));
       }
 
-      // Fungsi untuk menampilkan countdown timer
-      function startCountdown() {
-        let seconds = 30;
-        const countdownDisplay = document.getElementById("countdown");
-        countdownDisplay.textContent = `Next update in ${seconds} seconds`;
-        const countdownInterval = setInterval(() => {
-          seconds--;
-          countdownDisplay.textContent = `Next update in ${seconds} seconds`;
-          if (seconds <= 0) {
-            clearInterval(countdownInterval);
-            updateStatus(); // Panggil updateStatus() setelah countdown selesai
-            startCountdown(); // Mulai countdown lagi setelah updateStatus() selesai
-          }
-        }, 1000); // Timer update setiap 1 detik
+      function updateSingleStatus(url) {
+        fetch("/status")
+          .then((response) => response.json())
+          .then((data) => {
+            const url_obj = data.urls.find((u) => u.url === url);
+            const rows = document
+              .getElementById("status-table")
+              .getElementsByTagName("tbody")[0].rows;
+            for (const row of rows) {
+              if (row.cells[0].textContent === url) {
+                row.cells[1].textContent = url_obj.status;
+                row.cells[2].classList.add("countdown");
+
+                // Tentukan interval berdasarkan status
+                const interval = url_obj.status === "Up" ? 60 : 30;
+                let seconds = interval;
+                row.cells[2].textContent = `${seconds} seconds`;
+
+                // Mulai countdown baru
+                countdowns[url] = {
+                  interval: setInterval(() => {
+                    seconds--;
+                    row.cells[2].textContent = `${seconds} seconds`;
+                    if (seconds <= 0) {
+                      clearInterval(countdowns[url].interval);
+                      // Update status hanya untuk URL yang bersangkutan
+                      updateSingleStatus(url);
+                    }
+                  }, 1000),
+                };
+              }
+            }
+          })
+          .catch((error) =>
+            console.error("Error fetching single status:", error)
+          );
       }
 
-      // Panggil startCountdown() saat halaman dimuat
-      startCountdown();
+      // Panggil updateStatus() saat halaman dimuat
+      updateStatus();
     </script>
   </body>
 </html>
