@@ -1,0 +1,52 @@
+{
+  "data": [
+    {
+      "name": "Lembaga Layanan Pendidikan Tinggi Wilayah XV",
+      "url": "https://lldikti15.kemdikbud.go.id/"
+    },
+    {
+      "name": "Lembaga Layanan Pendidikan Tinggi Wilayah VII",
+      "url": "https://lldikti7.kemdikbud.go.id/"
+    },
+    {
+      "name": "Politeknik Ubaya",
+      "url": "https://poltek.ubaya.ac.id/"
+    },
+    {
+      "name": "Universitas Islam Lamongan",
+      "url": "https://unisla.ac.id/"
+    },
+    {
+      "name": "Universitas Negeri Surabaya",
+      "url": "https://unesa.ac.id/"
+    },
+    {
+      "name": "Universitas Airlangga",
+      "url": "https://unair.ac.id/"
+    },
+    {
+      "name": "Institut Teknologi Sepuluh Nopember",
+      "url": "https://www.its.ac.id/"
+    },
+    {
+      "name": "Universitas Pembangunan Nasional Veteran Jawa Timur",
+      "url": "https://www.upnjatim.ac.id/"
+    },
+    {
+      "name": "Universitas Islam Negeri Sunan Ampel Surabaya",
+      "url": "https://uinsa.ac.id/"
+    },
+    {
+      "name": "Universitas Nahdlatul Ulama Surabaya",
+      "url": "https://unusa.ac.id/"
+    },
+    {
+      "name": "Universitas Surabaya",
+      "url": "https://www.ubaya.ac.id/"
+    },
+    {
+      "name": "Universitas Kristen Petra",
+      "url": "https://www.petra.ac.id/"
+    }
+  ]
+}
